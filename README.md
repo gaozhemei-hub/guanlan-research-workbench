@@ -4,6 +4,8 @@
 
 **当前：v0.8.1 本地单用户版本。** 完成工程修复与本地回归；AI仍为实验性辅助，人工盲评与真人试用尚未开展。未部署线上体验站。
 
+公开源码：https://github.com/gaozhemei-hub/guanlan-research-workbench
+
 先看[最新使用说明书](docs/使用说明书-v0.8.1.md)、[发布验收及限制](docs/发布验收-2026-10-13.md)和[PRD发布状态补充](docs/PRD-v0.3.md)。
 
 ## 开始使用
