@@ -1,0 +1,77 @@
+{
+  "base_url": "http://127.0.0.1:15055",
+  "tested_at": "2026-10-11T10:45:59.592509+00:00",
+  "upstream_commit": "a0f6f3081ae06328f0a451b3a3ef2959ca25721d",
+  "results": [
+    {
+      "name": "health",
+      "status": "passed",
+      "seconds": 0.02,
+      "detail": {
+        "status": "healthy"
+      }
+    },
+    {
+      "name": "notebook_create",
+      "status": "passed",
+      "seconds": 0.08,
+      "detail": {
+        "created": true
+      }
+    },
+    {
+      "name": "text_source_import_no_model",
+      "status": "passed",
+      "seconds": 1.184,
+      "detail": {
+        "created": true,
+        "full_text_matches": true
+      }
+    },
+    {
+      "name": "source_readback_and_paragraph_anchor",
+      "status": "passed",
+      "seconds": 0.103,
+      "detail": {
+        "exact_text_preserved": true,
+        "paragraph_count": 3,
+        "locator": "client-derived paragraph; no page/time claim"
+      }
+    },
+    {
+      "name": "note_edit_save_readback",
+      "status": "passed",
+      "seconds": 0.184,
+      "detail": {
+        "edit_persisted": true,
+        "embedding_not_verified": true
+      }
+    },
+    {
+      "name": "custom_transformation_template_crud",
+      "status": "passed",
+      "seconds": 0.039,
+      "detail": {
+        "saved": true,
+        "executed_with_model": false
+      }
+    },
+    {
+      "name": "async_text_import_with_worker",
+      "status": "passed",
+      "seconds": 0.902,
+      "detail": {
+        "initial_status": "new",
+        "exact_text_preserved": true,
+        "worker_completed": true
+      }
+    }
+  ],
+  "not_tested": [
+    "LLM generation and citation semantic accuracy",
+    "embedding",
+    "frontend",
+    "custom research revision integration",
+    "durability after DB restart (memory database)"
+  ]
+}

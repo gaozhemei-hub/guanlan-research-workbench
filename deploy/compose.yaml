@@ -1,0 +1,11 @@
+# 本机验证用（负责人执行）：docker compose -f deploy/compose.yaml --env-file deploy/deploy.env up --build
+services:
+  guanlan:
+    build: ..
+    ports: ["127.0.0.1:8765:8765"]
+    env_file: deploy.env
+    volumes: ["guanlan-data:/data"]
+    mem_limit: 1g
+    restart: unless-stopped
+volumes:
+  guanlan-data: {}

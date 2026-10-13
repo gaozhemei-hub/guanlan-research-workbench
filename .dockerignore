@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+data/
+.venv/
+**/__pycache__/
+*.pyc
+.git/
+tests/
+docs/
+prototype/archive-*/
+prototype/*.html
+prototype/*.png

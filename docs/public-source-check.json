@@ -1,0 +1,40 @@
+{
+  "checkedAt": "2026-10-11T12:20:44.527843+00:00",
+  "sources": [
+    {
+      "id": "DFII10",
+      "status": "ok",
+      "count": 100,
+      "fetchedAt": "2026-10-11T12:20:43.923548+00:00",
+      "error": null
+    },
+    {
+      "id": "T10YIE",
+      "status": "ok",
+      "count": 100,
+      "fetchedAt": "2026-10-11T12:20:44.525318+00:00",
+      "error": null
+    },
+    {
+      "id": "DTWEXBGS",
+      "status": "ok",
+      "count": 100,
+      "fetchedAt": "2026-10-11T12:20:43.561016+00:00",
+      "error": null
+    },
+    {
+      "id": "fed",
+      "status": "ok",
+      "count": 15,
+      "fetchedAt": "2026-10-11T12:20:43.843979+00:00",
+      "error": null
+    },
+    {
+      "id": "bls",
+      "status": "error",
+      "count": 0,
+      "fetchedAt": null,
+      "error": "HTTPError: HTTP Error 403: Forbidden"
+    }
+  ]
+}

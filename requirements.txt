@@ -1,0 +1,4 @@
+feedparser==6.0.12
+TA-Lib==0.6.8
+certifi==2026.7.22
+akshare==1.19.1

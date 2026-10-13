@@ -1,0 +1,66 @@
+{
+  "base_url": "http://127.0.0.1:15055",
+  "tested_at": "2026-10-11T10:12:21.650310+00:00",
+  "upstream_commit": "a0f6f3081ae06328f0a451b3a3ef2959ca25721d",
+  "results": [
+    {
+      "name": "health",
+      "status": "passed",
+      "seconds": 0.006,
+      "detail": {
+        "status": "healthy"
+      }
+    },
+    {
+      "name": "notebook_create",
+      "status": "passed",
+      "seconds": 0.02,
+      "detail": {
+        "created": true
+      }
+    },
+    {
+      "name": "text_source_import_no_model",
+      "status": "failed",
+      "seconds": 45.003,
+      "detail": "timed out"
+    },
+    {
+      "name": "source_readback_and_paragraph_anchor",
+      "status": "failed",
+      "seconds": 0.0,
+      "detail": "'source'"
+    },
+    {
+      "name": "note_edit_save_readback",
+      "status": "passed",
+      "seconds": 0.17,
+      "detail": {
+        "edit_persisted": true,
+        "embedding_not_verified": true
+      }
+    },
+    {
+      "name": "custom_transformation_template_crud",
+      "status": "passed",
+      "seconds": 0.034,
+      "detail": {
+        "saved": true,
+        "executed_with_model": false
+      }
+    },
+    {
+      "name": "async_text_import_with_worker",
+      "status": "failed",
+      "seconds": 25.614,
+      "detail": "Async text was not available within 25 seconds"
+    }
+  ],
+  "not_tested": [
+    "LLM generation and citation semantic accuracy",
+    "embedding",
+    "frontend",
+    "custom research revision integration",
+    "durability after DB restart (memory database)"
+  ]
+}
