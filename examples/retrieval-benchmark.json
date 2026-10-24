@@ -1,0 +1,28 @@
+{
+  "version": "original-teaching-v1",
+  "disclosure": "AI-authored synthetic teaching corpus and labels, not real market facts or human evaluation. Evaluation split is reserved for comparison, not an independent human blind test.",
+  "sources": [
+    {"id": "credit", "text": "居民信贷增速转正只是信用传导的一个观察信号。核查时需要区分同比、环比及新增贷款，并核对统计期间，不能把单月回升认作趋势确认。"},
+    {"id": "gold", "text": "黄金研究需要分别记录实际利率、美元走势与风险事件。实际利率上行可能增加持有黄金的机会成本，但不能单凭这一条判断金价。"},
+    {"id": "silver", "text": "白银工业需求可以从光伏装机与单位耗银量拆解。装机增加不必然带来耗银总量同步增加，单位耗银量下降是需要核对的反向条件。"},
+    {"id": "mining", "text": "矿业公司研究应区分产量、实现售价与单位成本。金属涨价不意味着利润一定增长，产量下降或成本上升可能抵消收入改善。"},
+    {"id": "valuation", "text": "公司估值横向比较需要统一快照日期、币种与报告期。负利润公司的市盈率不适合直接参与正市盈率公司的高低排序。"},
+    {"id": "narrative", "text": "叙事观察卡应记录初始假设、支持证据、反证与复核时间。新闻数量增加不能证明假设成立，暂停观察也不等于假设被证伪。"},
+    {"id": "oil", "text": "油价上涨如何影响下游企业，取决于成本占比、库存周期和转嫁能力。研究传导时应逐环节检查合同调价机制，而不是直接列出受益名单。"},
+    {"id": "source", "text": "播客观点归档时应保留原文段落与来源日期。逐字引用匹配只能证明文本出现过，不能证明观点真实，也不能代替事实核查。"}
+  ],
+  "questions": [
+    {"id": "d1", "split": "dev", "query": "居民信贷增速转正就说明趋势确认了吗", "expected": ["credit"]},
+    {"id": "d2", "split": "dev", "query": "白银光伏需求需要看哪些反向条件", "expected": ["silver"]},
+    {"id": "d3", "split": "dev", "query": "公司估值如何横向比较", "expected": ["valuation"]},
+    {"id": "d4", "split": "dev", "query": "油价成本如何传导到下游", "expected": ["oil"]},
+    {"id": "d5", "split": "dev", "query": "火星轨道半径", "expected": []},
+    {"id": "e1", "split": "evaluation", "query": "无息贵金属的持有代价如何变化", "expected": ["gold"]},
+    {"id": "e2", "split": "evaluation", "query": "卖得更贵为什么不一定赚得更多", "expected": ["mining"]},
+    {"id": "e3", "split": "evaluation", "query": "如何避免只收集赞成自己假设的资讯", "expected": ["narrative"]},
+    {"id": "e4", "split": "evaluation", "query": "原文引用正确是否说明观点真实", "expected": ["source"]},
+    {"id": "e5", "split": "evaluation", "query": "金属涨价和油价上涨需要怎样核查企业成本", "expected": ["mining", "oil"]},
+    {"id": "e6", "split": "evaluation", "query": "黄金明天的精确价格是多少", "expected": []},
+    {"id": "e7", "split": "evaluation", "query": "哪些公司下个月一定上涨", "expected": []}
+  ]
+}

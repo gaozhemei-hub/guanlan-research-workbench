@@ -1,6 +1,6 @@
 # RAG indexing contract — proposed experiment
 
-Status: specification only. No product indexing endpoint exists yet.
+Status: proposed product contract. A subset is implemented in the isolated lexical experiment (see [record](../retrieval-experiment-v0.1.md)); no product indexing endpoint exists yet. Historical search, answer caches and browser synchronization remain unimplemented.
 
 ## Source of truth and consent
 

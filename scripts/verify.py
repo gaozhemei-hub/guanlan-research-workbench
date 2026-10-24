@@ -12,7 +12,7 @@ import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
 BACKEND = ['test_backend', 'test_providers', 'test_prices', 'test_prices_candidate',
-           'test_ai_options', 'test_ai_quote', 'test_audit_regressions', 'test_deploy']
+           'test_ai_options', 'test_ai_quote', 'test_audit_regressions', 'test_deploy', 'test_retrieval']
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)

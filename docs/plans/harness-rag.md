@@ -13,6 +13,8 @@ Reference: [OpenAI Harness engineering](https://openai.com/index/harness-enginee
 
 ## Next: RAG experiment
 
+2026-10-25: isolated SQLite lifecycle and lexical baseline implemented. Original small fixture and first results are documented in [experiment v0.1](../retrieval-experiment-v0.1.md). Vector/hybrid/reranking comparisons and product integration remain pending. The comparison split has now been observed; it is not a fresh blind set.
+
 - Implement and test the proposed [indexing contract](rag-index-contract.md) for browser-owned records, source versions and deletion semantics.
 - Prepare original public fixtures with question-to-evidence labels before tuning; keep a held-out set. Private experiments remain local.
 - Compare keyword, vector, hybrid and reranked retrieval under identical questions and evidence labels. Do not assume reranking improves results.

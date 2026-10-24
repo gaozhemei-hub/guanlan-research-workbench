@@ -1,5 +1,9 @@
 # Harness quality record — 2026-10-24
 
+## Follow-up — 2026-10-25
+
+The isolated lexical retrieval experiment adds 8 lifecycle tests (idempotence/offsets, revision/deletion, stale recovery, transactional rollback, workspace isolation, version/quote validation, empty/no-overlap search, persistence). Unified verification in `data/verification/run-akrw36wf/` passed: **72 backend tests and 15 browser tests**. No product UI integration, real model call or human evaluation was performed. The synthetic retrieval benchmark is documented separately in [experiment v0.1](retrieval-experiment-v0.1.md); candidate recall is not answer accuracy. The dated foundation record below is preserved.
+
 Foundation branch: `engineering/harness-foundation`. Product remains v0.8.1; RAG is not implemented.
 
 Implemented: short knowledge entry, architecture/data ownership map, current execution plan, isolated verification runner, shared test target URL, backend-only CI definition.
