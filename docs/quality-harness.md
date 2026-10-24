@@ -2,6 +2,8 @@
 
 ## Follow-up — 2026-10-25
 
+Second follow-up: paragraph-level lexical/vector/hybrid/reranked comparison completed on original fixtures; see [v0.2 results](retrieval-experiment-v0.2.md). Optional local model dependencies are isolated from product dependencies. Engineering run `data/verification/run-10jq2dku/`: **74 backend tests passed**, including two scoring/fusion tests. After the optional reranker path was added, all 10 retrieval lifecycle/metric tests passed; the actual four-method experiment also completed. No UI changes; no new browser run. No paid API call or private corpus use. Model downloads and inference occurred locally; no generated answers or human assessment.
+
 The isolated lexical retrieval experiment adds 8 lifecycle tests (idempotence/offsets, revision/deletion, stale recovery, transactional rollback, workspace isolation, version/quote validation, empty/no-overlap search, persistence). Unified verification in `data/verification/run-akrw36wf/` passed: **72 backend tests and 15 browser tests**. No product UI integration, real model call or human evaluation was performed. The synthetic retrieval benchmark is documented separately in [experiment v0.1](retrieval-experiment-v0.1.md); candidate recall is not answer accuracy. The dated foundation record below is preserved.
 
 Foundation branch: `engineering/harness-foundation`. Product remains v0.8.1; RAG is not implemented.

@@ -10,7 +10,7 @@ External credentials stay server-side. AI outputs are proposals until confirmed 
 
 ## RAG experiment boundary (not integrated)
 
-`server/retrieval.py` implements an isolated SQLite/lexical experiment with atomic current-version replacement, stale states, deletion and exact-quote checking. It has no HTTP endpoint and does not read browser records. See [experiment record](docs/retrieval-experiment-v0.1.md). Vector retrieval and answer generation are not implemented.
+`server/retrieval.py` implements an isolated SQLite/lexical experiment with atomic current-version replacement, stale states, deletion and exact-quote checking. It has no HTTP endpoint and does not read browser records. See [experiment record](docs/retrieval-experiment-v0.1.md). `scripts/compare-retrieval.py` separately evaluates local vector/hybrid retrieval on original fixtures with optional dependencies; it is not a production index backend. Answer generation is not implemented.
 
 Browser-owned research needs an explicit indexing/synchronization contract before a server-side index can represent it. Stable source IDs, version IDs, deletion propagation and rebuild rules must be designed first. An index is derived data, never the authoritative research record.
 

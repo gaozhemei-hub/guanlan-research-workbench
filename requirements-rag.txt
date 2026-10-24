@@ -1,0 +1,7 @@
+# Optional local experiment only; install in a separate environment.
+# Direct versions from the 2026-10-25 macOS CPU run, not a full transitive lock.
+sentence-transformers==6.2.0
+torch==2.14.1
+transformers==5.20.2
+huggingface-hub==2.3.0
+numpy==2.5.4

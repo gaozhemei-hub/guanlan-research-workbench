@@ -1,6 +1,6 @@
 # Harness foundation and RAG experiment
 
-Status: foundation locally verified (64 backend and 15 browser checks); remote CI not yet executed. RAG not implemented. See the [quality record](../quality-harness.md) for failed attempts and recovery evidence.
+Status: foundation locally verified; isolated retrieval experiments now include lexical, vector and hybrid methods. Product RAG integration is not implemented; remote CI not yet executed. See the [quality record](../quality-harness.md) for dated results and recovery evidence.
 
 Reference: [OpenAI Harness engineering](https://openai.com/index/harness-engineering/). Adaptation for a small single-user product, not an official framework integration.
 
@@ -14,6 +14,8 @@ Reference: [OpenAI Harness engineering](https://openai.com/index/harness-enginee
 ## Next: RAG experiment
 
 2026-10-25: isolated SQLite lifecycle and lexical baseline implemented. Original small fixture and first results are documented in [experiment v0.1](../retrieval-experiment-v0.1.md). Vector/hybrid/reranking comparisons and product integration remain pending. The comparison split has now been observed; it is not a fresh blind set.
+
+Follow-up: expanded to 24 paragraphs and 17 questions in [experiment v0.2](../retrieval-experiment-v0.2.md). Local vector, hybrid and cross-encoder reranking comparisons executed; neither candidate relevance nor source matching establishes answer sufficiency. Parameters and labels were not tuned on observed comparison results. Product integration remains pending. Next: token-bounded long-document chunks, independent acceptance questions, then explicit browser indexing and evidence previews; answer generation requires separate sufficiency checks.
 
 - Implement and test the proposed [indexing contract](rag-index-contract.md) for browser-owned records, source versions and deletion semantics.
 - Prepare original public fixtures with question-to-evidence labels before tuning; keep a held-out set. Private experiments remain local.

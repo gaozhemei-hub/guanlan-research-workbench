@@ -82,7 +82,7 @@ python3 -m venv .venv
 
 统一验收入口：`python scripts/verify.py`（先安装 requirements.txt）。浏览器验证可加 `--ui-python /path/to/playwright/python`；该环境需已安装 Playwright 及 Chromium。命令自动启动隔离服务、记录结果并清理服务；省略该参数表示未执行浏览器测试。结果写入被忽略的 `data/verification/`。GitHub 工作流仅运行后端检查，浏览器与真实模型评测不包含其中。
 
-产品尚未接入 RAG。已有独立的 [本地词法检索实验与结果](docs/retrieval-experiment-v0.1.md)，支持索引版本、删除与引用检查；向量检索、生成问答和浏览器同步仍未实现。后续范围见 [执行计划](docs/plans/harness-rag.md)。
+产品尚未接入 RAG。已有独立的 [索引生命周期实验](docs/retrieval-experiment-v0.1.md) 和 [词法、向量与混合检索对比](docs/retrieval-experiment-v0.2.md)；生成问答和浏览器同步仍未实现。实验模型在本机运行，可选依赖与产品隔离。后续范围见 [执行计划](docs/plans/harness-rag.md)。
 
 ```sh
 .venv/bin/python tests/test_backend.py
