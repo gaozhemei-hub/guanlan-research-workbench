@@ -5,10 +5,10 @@
 AI 场景用 page.route 拦截 /api/state 与 /api/analyze，属于**模拟响应**，不调用真实模型。
 所有场景使用全新浏览器上下文（独立 localStorage），不读取个人数据。
 """
-import json, sys, time, argparse
+import json, sys, time, argparse, os
 from playwright.sync_api import sync_playwright
 
-BASE = 'http://127.0.0.1:8765/'
+BASE = os.environ.get('GUANLAN_TEST_URL', 'http://127.0.0.1:8765/').rstrip('/') + '/'
 RESULTS = {}
 
 def new_page(browser, mock_ai=None):

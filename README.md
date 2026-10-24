@@ -78,6 +78,12 @@ python3 -m venv .venv
 
 ## 开发与验证
 
+开发入口见 [AGENTS.md](AGENTS.md) 和 [架构说明](ARCHITECTURE.md)。后续修改以本 Git 仓库为准，在分支上验证后合并；历史副本不再作为并行开发目标。
+
+统一验收入口：`python scripts/verify.py`（先安装 requirements.txt）。浏览器验证可加 `--ui-python /path/to/playwright/python`；该环境需已安装 Playwright 及 Chromium。命令自动启动隔离服务、记录结果并清理服务；省略该参数表示未执行浏览器测试。结果写入被忽略的 `data/verification/`。GitHub 工作流仅运行后端检查，浏览器与真实模型评测不包含其中。
+
+RAG 尚未实现，后续范围见 [执行计划](docs/plans/harness-rag.md)。
+
 ```sh
 .venv/bin/python tests/test_backend.py
 .venv/bin/python tests/test_providers.py
