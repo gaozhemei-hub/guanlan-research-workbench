@@ -1,6 +1,8 @@
 # RAG indexing contract — proposed experiment
 
-Status: proposed product contract. A subset is implemented in the isolated lexical experiment (see [record](../retrieval-experiment-v0.1.md)); no product indexing endpoint exists yet. Historical search, answer caches and browser synchronization remain unimplemented.
+Status: proposed persistent-index contract. A subset is implemented in the isolated lexical experiment (see [record](../retrieval-experiment-v0.1.md)); the product now has request-scoped retrieval as described below. Historical search, answer caches and persistent browser synchronization remain unimplemented.
+
+2026-10-25 adaptation: the first product endpoint `/api/retrieve` uses explicit per-request selection and a temporary memory index, not a persistent index. See [user flow](../历史证据检索-使用说明-v0.1.md). This avoids retaining deleted browser records server-side; it does not claim persistent synchronization is implemented. The lifecycle rules below continue to apply to any future persistent vector backend.
 
 ## Source of truth and consent
 

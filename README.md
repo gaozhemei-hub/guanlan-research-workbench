@@ -84,6 +84,8 @@ python3 -m venv .venv
 
 产品尚未接入 RAG。已有独立的 [索引生命周期实验](docs/retrieval-experiment-v0.1.md) 和 [词法、向量与混合检索对比](docs/retrieval-experiment-v0.2.md)；生成问答和浏览器同步仍未实现。实验模型在本机运行，可选依赖与产品隔离。后续范围见 [执行计划](docs/plans/harness-rag.md)。
 
+开发分支现可使用 [历史证据检索](docs/历史证据检索-使用说明-v0.1.md)：勾选已归档材料，按次发送到本机服务做词法检索，打开原文核对高亮。服务端不持久保存此语料；向量、重排和生成问答尚未接入页面。此入口需运行本地服务，离线 HTML 中禁用。
+
 ```sh
 .venv/bin/python tests/test_backend.py
 .venv/bin/python tests/test_providers.py

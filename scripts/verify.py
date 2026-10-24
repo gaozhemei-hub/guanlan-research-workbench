@@ -13,7 +13,7 @@ import urllib.request
 ROOT = Path(__file__).resolve().parents[1]
 BACKEND = ['test_backend', 'test_providers', 'test_prices', 'test_prices_candidate',
            'test_ai_options', 'test_ai_quote', 'test_audit_regressions', 'test_deploy',
-           'test_retrieval', 'test_retrieval_metrics']
+           'test_retrieval', 'test_retrieval_metrics', 'test_retrieval_request']
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -61,7 +61,7 @@ def main():
                         except OSError: time.sleep(.1)
                     if ready:
                         run('ui', [args.ui_python, '-m', 'unittest', 'tests.test_ui_regressions',
-                                   'tests.test_reliability_followup', '-v'], 180)
+                                   'tests.test_reliability_followup', 'tests.test_retrieval_ui', '-v'], 180)
                     else: results.append(dict(check='server-start', exit_code=1))
                 finally:
                     if process.poll() is None:

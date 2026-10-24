@@ -1,6 +1,6 @@
 # Harness foundation and RAG experiment
 
-Status: foundation locally verified; isolated retrieval experiments now include lexical, vector and hybrid methods. Product RAG integration is not implemented; remote CI not yet executed. See the [quality record](../quality-harness.md) for dated results and recovery evidence.
+Status: foundation locally verified; isolated retrieval experiments include lexical, vector, hybrid and reranked methods. The product now offers request-scoped lexical evidence search and source previews; vector/generation integration is not implemented. Remote CI not yet executed. See the [quality record](../quality-harness.md) for dated results and recovery evidence.
 
 Reference: [OpenAI Harness engineering](https://openai.com/index/harness-engineering/). Adaptation for a small single-user product, not an official framework integration.
 
@@ -25,5 +25,7 @@ Follow-up: expanded to 24 paragraphs and 17 questions in [experiment v0.2](../re
 - Integrate historical research associations after retrieval and indexing validation; user confirmation remains mandatory.
 
 ## Deferred
+
+Latest implementation: [evidence search flow](../历史证据检索-使用说明-v0.1.md) now supports explicit selection, in-memory per-request indexing and source highlighting. Token-counted long-text chunks passed cached-tokenizer validation. 79 backend / 19 UI tests passed. Next: connect optional local vector/reranking to the same lifecycle, validate independent long-form questions and latency, and only then consider answer generation with evidence-sufficiency checks. No persistent server corpus is introduced by the first page.
 
 Human blind evaluation, real-user testing, online hosting and fully automated merging. No new paid-model budget is inferred from the earlier dated evaluation authorization.

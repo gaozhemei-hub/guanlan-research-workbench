@@ -8,6 +8,10 @@
 th small { display:block; margin-top:4px; font-weight:normal; }
 
 .transmission-path {display:flex;flex-wrap:wrap;gap:12px;list-style:none;padding:0;} .transmission-path li {background:#eef2e9;padding:12px;border-radius:8px;max-width:260px;} .transmission-path li:not(:last-child)::after {content:" →";color:#547858;} .research-entry h3 {line-height:1.7;} #dialog h3 {margin-top:24px;}
+:root .evidence-choice{display:flex;gap:10px;align-items:center;margin:12px 0}
+.evidence-choice input{width:auto}
+.evidence-source{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.9}
+#evidence-query{width:100%;margin:12px 0}
 </style></head><body><div class="shell"><aside class="sidebar"><a class="brand" href="#home"><span class="mark">澜</span><span>观澜<small>有框架的研究</small></span></a><div class="side-label">我的研究空间 <span>LOCAL</span></div><nav id="nav" aria-label="主导航"></nav><div class="sidebar-note"><span class="tiny-dot"></span> 从问题出发，让证据归位<p>宏观 → 行业 → 公司<br>叙事贯穿每一层</p></div><div class="side-foot">个人研究工作台 · v0.8.1<br><span id="connection">正在检查本地服务</span></div></aside><main><header class="topbar"><span id="crumb">研究总览</span><div><span class="pill" id="save-state">本浏览器保存</span><button id="export" class="button small">导出备份 ↗</button></div></header><div class="page" id="page"></div><footer>观澜 · 让每一条新信息，都有可以落脚的问题。<span>研究记录，不生成交易指令</span></footer></main></div><dialog id="dialog"><div id="dialog-content"></div></dialog><div id="toast" role="status"></div><script>'use strict';
 const FRAMES = [
  {id:'growth',area:'macro',name:'经济增长',sub:'需求与供给',question:'增长来自哪里，能否持续？',desc:'先拆投资、消费、出口，再用工业与服务供给交叉验证；国内与美国分别看口径。',path:['需求动能','订单与生产','收入和就业','后续需求'],metrics:['中国 GDP：同比 / 季调环比','制造业 PMI：新订单与生产分项','消费、投资、出口及工业增加值'],checks:['同比改善是否只是低基数？','房地产：政策与融资是否传导到销售、再到投资？','美国：就业、工资和消费能否相互印证？'],counter:'总量向好但结构分化，或订单无法转化为收入。',tags:['GDP','PMI','就业','消费','出口','employment','growth'],basis:'宏观研究材料的方法转译 · 供需与结构分析'},
@@ -21,8 +25,8 @@ const FRAMES = [
  {id:'technical',area:'companies',name:'价格与技术',sub:'描述走势',question:'价格表现是什么，数据口径是否可比？',desc:'用收盘价计算 MA、RSI、MACD。技术指标描述历史价格，不替代经营或估值判断。',path:['同口径价格','指标计算','横向比较','提出解释问题'],metrics:['MA20','RSI14','MACD(12,26,9)'],checks:['复权方式、币种和交易日期是否一致？','样本长度是否足够？','量价表现是否有公告或经营证据支持？'],counter:'数据缺失、复权变化或单一指标出现多种解释。',tags:['技术','RSI','MACD','均线','股价'],basis:'技术指标独立于估值 · TA-Lib 计算'},
  {id:'narrative',area:'narrative',name:'市场叙事',sub:'想象 → 可检验条件',question:'市场相信的未来，需要什么条件才会兑现？',desc:'记录叙事提出者、传播线索、落地条件与反证。关联具体的宏观、行业或公司问题，不把热度当基本面。',path:['谁在讲述','共识如何变化','落地里程碑','兑现或证伪'],metrics:['公开表述与可追溯来源','政策 / 技术 / 商业里程碑','与叙事相反的证据'],checks:['观点是谁提出的，是否只是单一来源？','技术可行、经济性成立和商业化是不同阶段吗？','什么情况会推翻这个故事？'],counter:'关键条件不成立、替代路线胜出或时间窗口变化。',tags:['叙事','共识','技术路线','替代','想象','narrative'],basis:'《穿透叙事》外部阅读稿的审慎转译 · 非原书核验结论'}
 ];
-const AREAS={home:'研究总览',macro:'宏观环境',metals:'贵金属产业',companies:'A 股公司',narrative:'叙事观察',reader:'材料研读',settings:'数据与设置'};
-const NAV=[['home','◫','研究总览','先看研究进度'],['macro','◎','宏观环境','增长 · 通胀 · 政策 · 金融'],['metals','◇','贵金属产业','黄金 · 白银 · 产业链'],['companies','▤','A 股公司','经营 · 估值 · 技术'],['narrative','◌','叙事观察','跨层次追踪假设'],['reader','＋','材料研读','把新信息放进框架'],['settings','⚙','数据与设置','连接状态 · 备份']];
+const AREAS={retrieval:'历史证据检索',home:'研究总览',macro:'宏观环境',metals:'贵金属产业',companies:'A 股公司',narrative:'叙事观察',reader:'材料研读',settings:'数据与设置'};
+const NAV=[['retrieval','⌕','历史证据检索','找回已归档原文'],['home','◫','研究总览','先看研究进度'],['macro','◎','宏观环境','增长 · 通胀 · 政策 · 金融'],['metals','◇','贵金属产业','黄金 · 白银 · 产业链'],['companies','▤','A 股公司','经营 · 估值 · 技术'],['narrative','◌','叙事观察','跨层次追踪假设'],['reader','＋','材料研读','把新信息放进框架'],['settings','⚙','数据与设置','连接状态 · 备份']];
 
 // Curated starting points; never inserted into the user's watchlist without confirmation.
 const NARRATIVE_TEMPLATES = [
@@ -83,7 +87,57 @@ function companyLivePrices(id){
  }catch(e){if(error.isConnected){error.textContent=e.message;button.disabled=false;}}};
 }
 </script>
-<script>let financialScope='metals';
+<script>// Explicit per-request retrieval: no persistent server corpus or generated answers.
+let evidenceView={selected:new Set(),query:'',hits:[],snapshot:[],busy:false,error:'',searched:false,request:0};
+function evidenceCurrent(){return evidenceView.snapshot.every(s=>state.entries.some(e=>e.id===s.id&&e.text===s.text));}
+function evidencePage(){
+ const v=evidenceView;
+ if(!evidenceCurrent()){v.hits=[];v.searched=false;v.error='材料已修改或删除，请重新检索。';}
+ const entries=state.entries.filter(e=>typeof e.text==='string'&&e.text.trim());
+ return heading('RESEARCH EVIDENCE','历史证据检索','从已归档材料中找回相关原文，再判断它是否支持你的研究。')+
+ `<div class="notice">试验版 · 词法检索，不是 AI 问答。点击检索会把勾选正文发送给当前连接的本机服务，在内存中按次建立索引，结束后释放；不调用外部模型、不保存服务端材料。</div>
+ <section class="card"><h2>1. 选择本次材料范围</h2><p>每次最多 20 条、合计 10 万字。同一材料的不同归档观点可能重复，请按需勾选。</p>
+ ${entries.length?entries.map(e=>`<label class="evidence-choice"><input type="checkbox" data-evidence-id="${esc(e.id)}" ${v.selected.has(e.id)?'checked':''}> <span>${esc(e.title||'未命名材料')} · ${esc(frame(e.node)?.name||'未归类')}</span></label>`).join(''):empty('还没有已归档材料','先到材料研读中导入正文、确认观点并归档。',action('去材料研读','goto','data-area="reader"'))}
+ <h2>2. 输入你想找的证据</h2><label for="evidence-query">研究问题或关键词</label><input id="evidence-query" maxlength="500" value="${esc(v.query)}" placeholder="例如：白银需求增长有哪些反向条件？">
+ <div class="actions"><button class="primary" id="evidence-search" ${!online||v.busy?'disabled':''}>${v.busy?'正在检索…':'发送所选材料并检索'}</button><button class="button" id="evidence-clear">清空本次范围与结果</button></div>
+ ${!online?'<p class="notice warn">请启动本地服务后使用。独立 HTML 离线文件不提供检索。</p>':''}<p id="evidence-error" role="status">${esc(v.error)}</p></section>
+ <section class="card" id="evidence-results"><h2>3. 核对候选原文</h2><p>返回最多 5 个相关片段。顺序只代表词汇匹配；可能遗漏反证，也可能完全不足以回答问题。</p>
+ ${v.hits.map((hit,i)=>{const source=v.snapshot.find(s=>s.id===hit.source);return `<article class="entry"><h3>${esc(source?.title||'材料')} · 原文片段 ${i+1}</h3><blockquote>${esc(hit.text)}</blockquote><small>词法匹配 · 原文字符 ${hit.start+1}–${hit.end}</small><div class="actions"><button class="button" data-evidence-open="${i}">回到原文核对</button></div></article>`;}).join('')||empty(v.searched?'没有词汇匹配结果':'尚未检索',v.searched?'这不代表材料没有相关观点。可改用关键词或直接阅读原文。':'先选择材料并输入问题。')}</section>`;
+}
+function bindEvidencePage(){
+ if(route!=='retrieval')return;
+ $$('[data-evidence-id]').forEach(box=>box.onchange=()=>{box.checked?evidenceView.selected.add(box.dataset.evidenceId):evidenceView.selected.delete(box.dataset.evidenceId);evidenceView.request++;evidenceView.busy=false;evidenceView.hits=[];evidenceView.searched=false;evidenceView.snapshot=[];render();});
+ $('#evidence-query').oninput=e=>{evidenceView.query=e.target.value;evidenceView.request++;evidenceView.busy=false;evidenceView.hits=[];evidenceView.searched=false;$('#evidence-results').innerHTML='<p>问题已变化，请重新检索。</p>';const button=$('#evidence-search');button.disabled=!online;button.textContent='发送所选材料并检索';};
+ $('#evidence-search').onclick=searchEvidence;
+ $('#evidence-clear').onclick=()=>{evidenceView={selected:new Set(),query:'',hits:[],snapshot:[],busy:false,error:'',searched:false,request:evidenceView.request+1};render();};
+ $$('[data-evidence-open]').forEach(button=>button.onclick=()=>openEvidence(Number(button.dataset.evidenceOpen)));
+}
+async function searchEvidence(){
+ const v=evidenceView;
+ v.snapshot=state.entries.filter(e=>v.selected.has(e.id)).map(e=>({id:e.id,text:e.text,title:e.title}));
+ v.hits=[];v.error='';v.searched=false;
+ if(!v.query.trim()||!v.snapshot.length){v.error='请勾选至少一条材料，并输入检索问题。';return render();}
+ if(v.snapshot.length>20||v.snapshot.reduce((n,s)=>n+Array.from(s.text).length,0)>100000){v.error='请选择最多 20 条、合计不超过 10 万字的材料。';return render();}
+ const request=++v.request;
+ v.busy=true;render();
+ try{
+  const result=await api('/api/retrieve',{query:v.query,materials:v.snapshot.map(({id,text})=>({id,text}))});
+  if(evidenceView!==v||request!==v.request)return;
+  if(!evidenceCurrent())throw Error('检索期间材料已变化，请重新检索。');
+  v.hits=result.hits;v.searched=true;
+ }catch(error){if(evidenceView===v&&request===v.request)v.error=error.message;}
+ finally{if(evidenceView===v&&request===v.request){v.busy=false;if(route==='retrieval')render();}}
+}
+function openEvidence(i){
+ const hit=evidenceView.hits[i],source=hit&&evidenceView.snapshot.find(s=>s.id===hit.source);
+ const current=source&&state.entries.find(e=>e.id===source.id);
+ if(!source||!current||current.text!==source.text){evidenceView.hits=[];evidenceView.error='原材料已变化，旧结果不能继续引用。';return render();}
+ const chars=Array.from(current.text);
+ if(chars.slice(hit.start,hit.end).join('')!==hit.text)return toast('引用位置校验失败，请重新检索');
+ dialog(current.title,`<p>高亮为本次检索片段；请结合前后文核对，不能据此自动确认观点。</p><div class="evidence-source">${esc(chars.slice(0,hit.start).join(''))}<mark id="evidence-highlight">${esc(hit.text)}</mark>${esc(chars.slice(hit.end).join(''))}</div>`);
+ $('#evidence-highlight').scrollIntoView({block:'center'});
+}
+</script><script>let financialScope='metals';
 'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -131,7 +185,7 @@ function allNews(){
  return [...grouped.values()];
 }
 function matched(w){const terms=w.keywords.split(/[,，\n]/).map(x=>x.trim().toLowerCase()).filter(Boolean);return allNews().filter(i=>terms.some(t=>i.title.toLowerCase().includes(t)));}
-function render(){$('#page').oninput=null;$('#page').onchange=null;if(!AREAS[route])route='home';$('#nav').innerHTML=NAV.map(([id,icon,name,sub])=>`<button class="nav-item ${route===id?'active':''}" data-route="${id}" ${route===id?'aria-current="page"':''}><span class="icon">${icon}</span><span><strong>${name}</strong><small>${sub}</small></span></button>`).join('');$('#crumb').textContent=`研究空间 / ${AREAS[route]}`;$('#connection').textContent=online?'本地数据服务已连接':'离线快照 · 可整理材料';$('#page').innerHTML=route==='home'?home():route==='inbox'?researchInbox():route==='reader'?reader():route==='settings'?settings():route==='narrative'?narratives():route==='companies'?companies():research();if(!online&&remote.snapshot)$('#page').insertAdjacentHTML('afterbegin',`<div class="notice warn snapshot-note">离线数据预览 · 采集检查 ${stamp(remote.checkedAt)}。每源最多展示 12 条新闻、40 个观察值或 8 期财报；不是实时数据。启动本地服务后可刷新和查看完整缓存。</div>`);bindLinks(document);bindPage();if($('#financial-period'))$('#financial-period').onchange=e=>{financialPeriod=e.target.value;render();};if(storageProblem)$('#save-state').textContent='读取异常 · 原数据未覆盖';}
+function render(){$('#page').oninput=null;$('#page').onchange=null;if(!AREAS[route])route='home';$('#nav').innerHTML=NAV.map(([id,icon,name,sub])=>`<button class="nav-item ${route===id?'active':''}" data-route="${id}" ${route===id?'aria-current="page"':''}><span class="icon">${icon}</span><span><strong>${name}</strong><small>${sub}</small></span></button>`).join('');$('#crumb').textContent=`研究空间 / ${AREAS[route]}`;$('#connection').textContent=online?'本地数据服务已连接':'离线快照 · 可整理材料';$('#page').innerHTML=route==='retrieval'?evidencePage():route==='home'?home():route==='inbox'?researchInbox():route==='reader'?reader():route==='settings'?settings():route==='narrative'?narratives():route==='companies'?companies():research();if(!online&&remote.snapshot)$('#page').insertAdjacentHTML('afterbegin',`<div class="notice warn snapshot-note">离线数据预览 · 采集检查 ${stamp(remote.checkedAt)}。每源最多展示 12 条新闻、40 个观察值或 8 期财报；不是实时数据。启动本地服务后可刷新和查看完整缓存。</div>`);bindLinks(document);bindPage();bindEvidencePage();if($('#financial-period'))$('#financial-period').onchange=e=>{financialPeriod=e.target.value;render();};if(storageProblem)$('#save-state').textContent='读取异常 · 原数据未覆盖';}
 function home(){const active=state.watches.filter(w=>w.active),due=active.reduce((a,w)=>a+matched(w).filter(i=>!w.seen?.includes(i.id)).length,0);return heading('RESEARCH WITH CONTEXT','让信息有来处，让研究有框架。','从宏观环境到贵金属，再到 A 股公司。每天沿着同一组问题，观察什么正在改变。')+`<section class="hero"><div><div class="eyebrow">YOUR RESEARCH ROUTE</div><h2>先知道要看什么，<br>再判断新信息改变了什么。</h2><p>框架是起点。数据与新闻提供证据，材料研读把新的启发放回已有问题。</p><div class="actions">${action('走一遍材料归档 →','demo','','primary')}${action('先看宏观框架','goto','data-area="macro"')}</div></div><div class="hero-map">${[['macro','01 宏观环境','增长 · 通胀 · 政策 · 金融'],['metals','02 贵金属产业','黄金 · 白银 · 产业链'],['companies','03 A 股公司','经营 · 估值 · 技术'],['narrative','↗ 叙事观察','假设 · 里程碑 · 反证']].map(([a,n,d])=>`<button data-route="${a}">${n}<small>${d}</small></button>`).join('')}</div></section><div class="section-head"><h2>我的研究进度</h2><span class="muted">框架内的证据与持续观察</span></div><div class="stat-row"><div class="card"><div class="count">${state.entries.length.toString().padStart(2,'0')}</div><small>已归档的材料观点</small></div><div class="card"><div class="count">${active.length.toString().padStart(2,'0')}</div><small>正在观察的主题</small></div><div class="card"><div class="count">${due.toString().padStart(2,'0')}</div><small>主题命中条次 · 可能重复</small></div></div><div class="grid"><div><section class="card"><div class="card-head"><h2>今天，从这里开始</h2><span class="pill">两条工作流</span></div><div class="journey-item"><span class="number">01</span><div><h3>日常查看：沿框架看变化</h3><p>选择一个问题，查看数据的观察日期与新闻来源。</p></div>${action('打开宏观 →','goto','data-area="macro"','ghost')}</div><div class="journey-item"><span class="number">02</span><div><h3>主动研究：拆解一份材料</h3><p>保留原文，判断它支持、挑战还是补充哪个问题。</p></div>${action('导入材料 →','goto','data-area="reader"','ghost')}</div><div class="journey-item"><span class="number">03</span><div><h3>持续观察：等待新的证据</h3><p>确认追踪主题后，在已接入的新闻中匹配关键词。</p></div>${action('查看主题 →','goto','data-area="narrative"','ghost')}</div></section><section class="card"><h2>最近归档</h2>${entryList(state.entries.slice(-3).reverse())}</section></div><aside><section class="card"><div class="card-head"><h3>数据连接</h3><span class="pill ${online?'':'warm'}">${online?'本地服务在线':'离线模式'}</span></div><p>${online?`公开源最近检查：${stamp(remote.checkedAt)}`:'通过「启动原型.command」开启数据与指标服务；离线也能导入、归档和导出材料。'}</p><p>实时行情与 A 股财报尚未接入。已取到的公开数据会显示真实时间，不用示例值补空。</p>${action('查看连接状态 →','goto','data-area="settings"','ghost')}</section><section class="card"><div class="eyebrow">FIRST FOCUS</div><h3>只把一个研究范围做扎实</h3><p>A 股贵金属相关公司。先分清产业链角色，再解释行业变化如何进入利润与现金流。</p>${action('看贵金属产业链 →','chain','','ghost')}</section></aside></div>`;}
 function tabs(items){return `<div class="tabs" role="tablist">${items.map(([id,label])=>`<button role="tab" aria-selected="${subtab===id}" class="${subtab===id?'active':''}" data-tab="${id}">${label}</button>`).join('')}</div>`;}
 function research(){const isMacro=route==='macro';if(!FRAMES.some(f=>f.area===route&&f.id===selected))selected=isMacro?'financial':'gold';const f=frame(selected);return heading(isMacro?'MACRO ENVIRONMENT':'PRECIOUS METALS',isMacro?'宏观环境':'贵金属产业',isMacro?'用增长、通胀、政策与货币金融四个维度，识别资产所处的环境。':'先分清黄金与白银的主导属性，再沿产业链追踪变化。',action('＋ 补充一份材料','import-node',`data-node="${f.id}"`))+tabs([['framework','研究框架'],...(isMacro?[]:[['chain','产业链地图']]),['data','数据面板'],['news','相关信息'],['evidence','我的证据']])+`<div class="framework-grid"><aside class="tree"><div class="tree-root">${isMacro?'宏观研究 / 四个维度':'贵金属 / 两种研究对象'}</div>${FRAMES.filter(x=>x.area===route).map(x=>`<button class="${x.id===selected?'active':''}" data-node="${x.id}"><strong>${x.name}</strong><small>${x.sub}</small></button>`).join('')}</aside><div>${subtab==='framework'?nodeCard(f):subtab==='chain'?chain(f):subtab==='data'?dataPanel(f):subtab==='news'?newsPanel(f):`<section class="card"><h2>${f.name} · 我的证据</h2>${entryList(state.entries.filter(e=>e.node===f.id).reverse())}</section>`}</div></div>`;}

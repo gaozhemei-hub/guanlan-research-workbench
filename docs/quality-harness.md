@@ -1,5 +1,13 @@
 # Harness quality record — 2026-10-24
 
+## Product retrieval follow-up — 2026-10-25
+
+Explicit material selection, request-scoped lexical retrieval, original-text highlighting and invalidation are implemented. Final run `data/verification/run-2h8xlxs5/`: **79 backend / 19 UI tests passed**. UI scenarios exercise the real endpoint after teaching-material archival; also cover Unicode offsets, source changes, late responses and offline HTML. The standalone HTML was rebuilt. Separate real-server screenshots were visually checked and contain original teaching data only.
+
+The first run `run-dtdil__a` failed one new HTTP test because it omitted the required same-origin header (403 rather than the expected 200); all 19 UI tests passed. The test was corrected without weakening endpoint checks. An initial ad-hoc tokenizer assertion compared reconstructed paragraph content with trailing whitespace still present; the corrected assertion explicitly excludes paragraph-edge whitespace and checks every original offset. Cached BGE tokenizer validation: 15,300 input characters, 19 chunks, max 512 tokens, exact trimmed-paragraph reconstruction. No content truncation, private corpus or paid API. This validates chunk mechanics, not retrieval/answer quality.
+
+See [usage and boundaries](历史证据检索-使用说明-v0.1.md). The page uses lexical retrieval only; vector/reranking remains experimental, with no generated answers.
+
 ## Follow-up — 2026-10-25
 
 Second follow-up: paragraph-level lexical/vector/hybrid/reranked comparison completed on original fixtures; see [v0.2 results](retrieval-experiment-v0.2.md). Optional local model dependencies are isolated from product dependencies. Engineering run `data/verification/run-10jq2dku/`: **74 backend tests passed**, including two scoring/fusion tests. After the optional reranker path was added, all 10 retrieval lifecycle/metric tests passed; the actual four-method experiment also completed. No UI changes; no new browser run. No paid API call or private corpus use. Model downloads and inference occurred locally; no generated answers or human assessment.

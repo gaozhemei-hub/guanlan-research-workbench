@@ -10,11 +10,17 @@ External credentials stay server-side. AI outputs are proposals until confirmed 
 
 ## RAG experiment boundary (not integrated)
 
-`server/retrieval.py` implements an isolated SQLite/lexical experiment with atomic current-version replacement, stale states, deletion and exact-quote checking. It has no HTTP endpoint and does not read browser records. See [experiment record](docs/retrieval-experiment-v0.1.md). `scripts/compare-retrieval.py` separately evaluates local vector/hybrid retrieval on original fixtures with optional dependencies; it is not a production index backend. Answer generation is not implemented.
+`server/retrieval.py` contains the SQLite/lexical index with atomic current-version replacement, stale states, deletion and exact-quote checking. Its original isolated experiment is recorded in [v0.1](docs/retrieval-experiment-v0.1.md); the request-scoped product path is described below. `scripts/compare-retrieval.py` separately evaluates local vector/hybrid retrieval on original fixtures with optional dependencies; it is not a production index backend. Answer generation is not implemented.
 
 Browser-owned research needs an explicit indexing/synchronization contract before a server-side index can represent it. Stable source IDs, version IDs, deletion propagation and rebuild rules must be designed first. An index is derived data, never the authoritative research record.
 
 Separate ingestion/chunking, retrieval, reranking, generation and citation validation. Retrieval experiments should run without a model API key. A generator must return source IDs and quotes; valid quotes alone do not prove that the conclusion follows.
+
+## First product retrieval path (2026-10-25)
+
+`prototype/dist/retrieval.js` implements explicit selection and source previews. `/api/retrieve` accepts up to 20 selected records / 100,000 characters, builds a request-scoped in-memory lexical index and closes it before returning. It inherits auth/host/origin controls, adds rate limiting and accepts only loopback connections. It does not persist or share source text. The browser remains authoritative; results are invalidated on in-page source/query/scope changes, with original text rechecked before highlighting. Cross-tab synchronization is not implemented.
+
+Production candidate chunks are bounded to 600 characters; this is not a token budget. The shared chunker accepts a tokenizer counting callback; a cached BGE tokenizer has separately validated long-text coverage under 512 tokens. Vector/reranking remains experiment-only. No endpoint generates answers.
 
 ## Verification
 

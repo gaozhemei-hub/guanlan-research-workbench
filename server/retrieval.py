@@ -38,6 +38,30 @@ def paragraphs(text):
         yield number, start, end, text[start:end]
 
 
+def bounded_chunks(text, max_units=600, count_units=len):
+    """Preserve paragraph/character offsets; caller chooses characters or tokenizer.
+
+    No overlap or truncation. A model caller must count special tokens too.
+    The final length is verified even for tokenizers with nonmonotonic lengths.
+    """
+    if max_units < 1:
+        raise ValueError('chunk budget must be positive')
+    for paragraph, start, end, _ in paragraphs(text):
+        while start < end:
+            low, high, best = start+1, end, None
+            while low <= high:
+                mid = (low+high)//2
+                if count_units(text[start:mid]) <= max_units:
+                    best = mid
+                    low = mid+1
+                else:
+                    high = mid-1
+            if best is None or count_units(text[start:best]) > max_units:
+                raise ValueError('one character exceeds chunk budget')
+            yield paragraph, start, best, text[start:best]
+            start = best
+
+
 class Index:
     def __init__(self, path=':memory:'):
         self.db = sqlite3.connect(path)
@@ -61,7 +85,7 @@ class Index:
     def close(self):
         self.db.close()
 
-    def replace(self, workspace, source, version, text, object_type='material', metadata=None):
+    def replace(self, workspace, source, version, text, object_type='material', metadata=None, chunker=paragraphs, chunking_version='paragraph-v1'):
         if not all(isinstance(v, str) and v.strip() for v in (workspace, source, version)):
             raise ValueError('workspace, source and version must be nonempty strings')
         try:
@@ -76,8 +100,8 @@ class Index:
             if old and old['version'] == version and old['fingerprint'] != fingerprint:
                 raise ValueError('changed content requires a new version')
             rows = []
-            for paragraph, start, end, chunk in paragraphs(text):
-                identity = json.dumps([workspace, source, version, 'paragraph-v1', start, end, digest(chunk)])
+            for paragraph, start, end, chunk in chunker(text):
+                identity = json.dumps([workspace, source, version, chunking_version, start, end, digest(chunk)])
                 rows.append((workspace, source, version, digest(identity), paragraph,
                              start, end, chunk, object_type, meta))
             # Build fully before replacing; transaction rollback retains the previous index.
@@ -127,3 +151,37 @@ class Index:
             ON c.workspace=s.workspace AND c.source=s.source
             WHERE c.workspace=? AND c.chunk_id=?''', (workspace, chunk_id)).fetchone()
         return bool(row and not row['stale'] and isinstance(quote, str) and quote.strip() and quote in row['text'])
+
+
+def retrieve_selected(payload):
+    """Request-scoped index: no persistence, shared corpus or remote model access."""
+    query = payload.get('query')
+    materials = payload.get('materials')
+    if not isinstance(query, str) or not query.strip() or len(query) > 500:
+        raise ValueError('请输入 1–500 字的检索问题')
+    if not isinstance(materials, list) or not 1 <= len(materials) <= 20:
+        raise ValueError('每次请选择 1–20 条已归档材料')
+    seen, total = set(), 0
+    for material in materials:
+        if not isinstance(material, dict):
+            raise ValueError('材料格式错误')
+        source, text = material.get('id'), material.get('text')
+        if not isinstance(source, str) or not 1 <= len(source) <= 100 or source in seen:
+            raise ValueError('材料标识无效或重复')
+        if not isinstance(text, str) or not text.strip():
+            raise ValueError('材料正文不能为空')
+        seen.add(source)
+        total += len(text)
+    if total > 100000:
+        raise ValueError('所选材料合计超过 10 万字，请缩小范围')
+    index = Index()
+    try:
+        for material in materials:
+            index.replace('request', material['id'], digest(material['text']), material['text'],
+                          chunker=bounded_chunks, chunking_version='characters-600-v1')
+        hits = index.search('request', query, limit=5)
+        return {'hits': hits, 'method': 'lexical-bm25-han-bigram-v1',
+                'scope': 'request-memory-only', 'chunking': 'characters-600-v1',
+                'warning': '候选段落只表示词汇相关，不代表证据充分或观点正确。未调用生成模型。'}
+    finally:
+        index.close()
