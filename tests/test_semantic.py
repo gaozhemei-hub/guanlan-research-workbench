@@ -2,7 +2,7 @@
 import os
 import subprocess
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from server import semantic
 from server.retrieval import retrieve_selected
 
@@ -17,16 +17,21 @@ class SemanticAdapter(unittest.TestCase):
             call.assert_not_called()
 
     def test_timeout_releases_lock_and_keeps_offline_boundary(self):
-        with patch.object(semantic.Path,'is_file',return_value=True), patch.object(semantic.subprocess,'run',side_effect=subprocess.TimeoutExpired('worker',38)) as call:
+        process = MagicMock()
+        process.communicate.side_effect = subprocess.TimeoutExpired('worker',38)
+        with patch.object(semantic.Path,'is_file',return_value=True), patch.object(semantic.subprocess,'Popen',return_value=process) as call, patch.object(semantic,'reap_group') as reap:
             with self.assertRaisesRegex(ValueError,'超时'):
                 semantic.retrieve(PAYLOAD)
             self.assertEqual(call.call_args.kwargs['env']['HF_HUB_OFFLINE'],'1')
             self.assertNotIn('矿企利润',str(call.call_args.args[0]))
+            self.assertTrue(call.call_args.kwargs['start_new_session'])
+            reap.assert_called_once_with(process)
         self.assertFalse(semantic.LOCK.locked())
 
     def test_worker_failure_does_not_echo_raw_error(self):
-        result=subprocess.CompletedProcess([],1,stdout='private source',stderr='private text')
-        with patch.object(semantic.Path,'is_file',return_value=True), patch.object(semantic.subprocess,'run',return_value=result):
+        process=MagicMock(returncode=1)
+        process.communicate.return_value=('private source','private text')
+        with patch.object(semantic.Path,'is_file',return_value=True), patch.object(semantic.subprocess,'Popen',return_value=process), patch.object(semantic,'reap_group'):
             with self.assertRaises(ValueError) as error:
                 semantic.retrieve(PAYLOAD)
         self.assertNotIn('private',str(error.exception))

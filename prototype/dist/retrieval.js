@@ -3,23 +3,23 @@ let evidenceView={selected:new Set(),method:'lexical',resultMethod:'',query:'',h
 function evidenceCurrent(){return evidenceView.snapshot.every(s=>state.entries.some(e=>e.id===s.id&&e.text===s.text));}
 function evidencePage(){
  const v=evidenceView;
- if(!evidenceCurrent()){v.hits=[];v.searched=false;v.error='材料已修改或删除，请重新检索。';}
+ if(!evidenceCurrent()){v.snapshot=[];v.request++;v.busy=false;v.hits=[];v.searched=false;v.error='材料已修改或删除，请重新检索。';}
  const entries=state.entries.filter(e=>typeof e.text==='string'&&e.text.trim());
  return heading('RESEARCH EVIDENCE','历史证据检索','从已归档材料中找回相关原文，再判断它是否支持你的研究。')+
  `<div class="notice">试验版 · 可选本机语义检索，不生成答案。点击检索会把勾选正文发送给当前连接的本机服务，在内存中按次建立索引，结束后释放；不调用外部模型、不保存服务端材料。</div>
  <section class="card"><h2>1. 选择本次材料范围</h2><p>每次最多 20 条、合计 10 万字。同一材料的不同归档观点可能重复，请按需勾选。</p>
  ${entries.length?entries.map(e=>`<label class="evidence-choice"><input type="checkbox" data-evidence-id="${esc(e.id)}" ${v.selected.has(e.id)?'checked':''}> <span>${esc(e.title||'未命名材料')} · ${esc(frame(e.node)?.name||'未归类')}</span></label>`).join(''):empty('还没有已归档材料','先到材料研读中导入正文、确认观点并归档。',action('去材料研读','goto','data-area="reader"'))}
  <h2>2. 输入你想找的证据</h2><label for="evidence-query">研究问题或关键词</label><input id="evidence-query" maxlength="500" value="${esc(v.query)}" placeholder="例如：白银需求增长有哪些反向条件？">
- <label for="evidence-method">检索方式</label><select id="evidence-method">${[['lexical','词法检索 · 默认'],['vector','本机语义检索 · 试验'],['reranked','本机混合＋重排 · 试验']].map(([id,label])=>`<option value="${id}" ${v.method===id?'selected':''}>${label}</option>`).join('')}</select><p>语义方式需预先安装本机环境与模型；每次限 1 万字正文、150 字问题。首次加载可能需要数秒；缺失模型时不自动下载或降级。</p><div class="actions"><button class="primary" id="evidence-search" ${!online||v.busy?'disabled':''}>${v.busy?'正在检索…':'发送所选材料并检索'}</button><button class="button" id="evidence-clear">清空本次范围与结果</button></div>
+ <label for="evidence-method">检索方式</label><select id="evidence-method">${[['lexical','词法检索 · 默认'],['vector','本机语义检索 · 试验'],['reranked','本机混合＋重排 · 试验']].map(([id,label])=>`<option value="${id}" ${v.method===id?'selected':''}>${label}</option>`).join('')}</select><p>语义方式需预先安装本机环境与模型；每次最多 100 段、1 万字正文、150 字问题。首次加载可能需要数秒；缺失模型时不自动下载或降级。</p><div class="actions"><button class="primary" id="evidence-search" ${!online||v.busy?'disabled':''}>${v.busy?'正在检索…':'发送所选材料并检索'}</button><button class="button" id="evidence-clear">清空本次范围与结果</button></div>
  ${!online?'<p class="notice warn">请启动本地服务后使用。独立 HTML 离线文件不提供检索。</p>':''}<p id="evidence-error" role="status">${esc(v.error)}</p></section>
  <section class="card" id="evidence-results"><h2>3. 核对候选原文</h2><p>返回最多 5 个相关片段。顺序只代表所选算法的相关性排序；可能遗漏反证，也可能完全不足以回答问题。</p>
  ${v.searched?`<div class="notice warn" id="evidence-status">${v.hits.length?'已找到候选片段 · 证据是否足以回答，尚未判断。':'本次未找到候选片段 · 不代表全部材料中不存在答案。'}没有生成答案。核对时请检查时间与统计口径、相反条件，以及问题需要的数字或事实是否真的出现。</div>`:''}
- ${v.hits.map((hit,i)=>{const source=v.snapshot.find(s=>s.id===hit.source);return `<article class="entry"><h3>${esc(source?.title||'材料')} · 原文片段 ${i+1}</h3><blockquote>${esc(hit.text)}</blockquote><small>${esc({'lexical-bm25-han-bigram-v1':'词法匹配','local-vector-bge-v1':'本机向量匹配','local-hybrid-reranked-v1':'本机混合＋重排'}[v.resultMethod]||'候选片段')} · 原文字符 ${hit.start+1}–${hit.end}</small><div class="actions"><button class="button" data-evidence-open="${i}">回到原文核对</button></div></article>`;}).join('')||empty(v.searched?'没有候选结果':'尚未检索',v.searched?'这不代表材料没有相关观点。可改用关键词或直接阅读原文。':'先选择材料并输入问题。')}</section>`;
+ ${v.hits.map((hit,i)=>{const source=v.snapshot.find(s=>s.id===hit.source);return `<article class="entry"><h3>${esc(source?.title||'材料')} · 原文片段 ${i+1}</h3><blockquote>${esc(hit.text)}</blockquote><small>${esc({'lexical-bm25-unicode-v2':'词法匹配','lexical-bm25-han-bigram-v1':'词法匹配','local-vector-bge-v1':'本机向量匹配','local-hybrid-reranked-v1':'本机混合＋重排'}[v.resultMethod]||'候选片段')} · 原文字符 ${hit.start+1}–${hit.end}</small><div class="actions"><button class="button" data-evidence-open="${i}">回到原文核对</button></div></article>`;}).join('')||empty(v.searched?'没有候选结果':'尚未检索',v.searched?'这不代表材料没有相关观点。可改用关键词或直接阅读原文。':'先选择材料并输入问题。')}</section>`;
 }
 function bindEvidencePage(){
  if(route!=='retrieval')return;
- $$('[data-evidence-id]').forEach(box=>box.onchange=()=>{box.checked?evidenceView.selected.add(box.dataset.evidenceId):evidenceView.selected.delete(box.dataset.evidenceId);evidenceView.request++;evidenceView.busy=false;evidenceView.hits=[];evidenceView.searched=false;evidenceView.snapshot=[];render();});
- $('#evidence-query').oninput=e=>{evidenceView.query=e.target.value;evidenceView.request++;evidenceView.busy=false;evidenceView.hits=[];evidenceView.searched=false;$('#evidence-results').innerHTML='<p>问题已变化，请重新检索。</p>';const button=$('#evidence-search');button.disabled=!online;button.textContent='发送所选材料并检索';};
+ $$('[data-evidence-id]').forEach(box=>box.onchange=()=>{box.checked?evidenceView.selected.add(box.dataset.evidenceId):evidenceView.selected.delete(box.dataset.evidenceId);evidenceView.error='';evidenceView.request++;evidenceView.busy=false;evidenceView.hits=[];evidenceView.searched=false;evidenceView.snapshot=[];render();});
+ $('#evidence-query').oninput=e=>{evidenceView.query=e.target.value;evidenceView.error='';$('#evidence-error').textContent='';evidenceView.request++;evidenceView.busy=false;evidenceView.hits=[];evidenceView.searched=false;$('#evidence-results').innerHTML='<p>问题已变化，请重新检索。</p>';const button=$('#evidence-search');button.disabled=!online;button.textContent='发送所选材料并检索';};
  $('#evidence-method').onchange=e=>{evidenceView.method=e.target.value;evidenceView.request++;evidenceView.busy=false;evidenceView.hits=[];evidenceView.searched=false;evidenceView.error='';render();};
  $('#evidence-search').onclick=searchEvidence;
  $('#evidence-clear').onclick=()=>{evidenceView={selected:new Set(),method:'lexical',resultMethod:'',query:'',hits:[],snapshot:[],busy:false,error:'',searched:false,request:evidenceView.request+1};render();};
@@ -31,7 +31,8 @@ async function searchEvidence(){
  v.hits=[];v.error='';v.searched=false;
  if(!v.query.trim()||!v.snapshot.length){v.error='请勾选至少一条材料，并输入检索问题。';return render();}
  if(v.snapshot.length>20||v.snapshot.reduce((n,s)=>n+Array.from(s.text).length,0)>100000){v.error='请选择最多 20 条、合计不超过 10 万字的材料。';return render();}
- if(v.method!=='lexical'&&(Array.from(v.query).length>150||v.snapshot.reduce((n,s)=>n+Array.from(s.text).length,0)>10000)){v.error='语义试验每次限 1 万字正文、150 字问题。';return render();}
+ if(v.method!=='lexical'&&(Array.from(v.query).length>150||v.snapshot.reduce((n,s)=>n+Array.from(s.text).length,0)>10000)){v.error='语义试验每次最多 100 段、1 万字正文、150 字问题。';return render();}
+ if(v.method!=='lexical'&&v.snapshot.reduce((n,s)=>n+s.text.split(/[\r\n]+/).filter(p=>p.trim()).length,0)>100){v.error='非空段落超过 100 段，请合并段落或减少材料。';return render();}
  const request=++v.request;
  v.busy=true;render();
  try{

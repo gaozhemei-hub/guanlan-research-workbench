@@ -7,7 +7,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from server.retrieval import Index
+from server.retrieval import Index, LEXICAL_METHOD
 
 
 def main():
@@ -42,7 +42,7 @@ def main():
             mrr_at_3=sum(r['reciprocal_rank'] for r in positive)/len(positive),
             unanswerable_questions=len(negative),
             unanswerable_with_candidates=sum(bool(r['retrieved']) for r in negative))
-    report = dict(corpus_sha256=hashlib.sha256(raw).hexdigest(), method='lexical-bm25-han-bigram-v1',
+    report = dict(corpus_sha256=hashlib.sha256(raw).hexdigest(), method=LEXICAL_METHOD,
                   disclosure=fixture['disclosure'], summary=summary, results=results,
                   limitation='Candidate retrieval is not answerability. No answer generation, semantic support assessment, vector comparison or human evaluation performed.')
     output = ROOT / 'data/retrieval-baseline'

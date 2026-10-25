@@ -10,17 +10,31 @@ RERANKER = ('cross-encoder/mmarco-mMiniLMv2-L12-H384-v1', '1427fd652930e4ba29e81
 PREFIX = '为这个句子生成表示以用于检索相关文章：'
 
 
+class WorkerError(Exception):
+    pass
+
+
+def load_model(factory, *args, **kwargs):
+    try:
+        return factory(*args, **kwargs)
+    except OSError:
+        raise WorkerError('MODEL_UNAVAILABLE') from None
+
+
 def run(payload):
-    from sentence_transformers import SentenceTransformer, CrossEncoder
-    import torch
+    try:
+        from sentence_transformers import SentenceTransformer, CrossEncoder
+        import torch
+    except ImportError:
+        raise WorkerError('MODEL_UNAVAILABLE') from None
     torch.set_num_threads(2)
     started = time.perf_counter()
-    model = SentenceTransformer(EMBEDDING[0], revision=EMBEDDING[1], device='cpu',
+    model = load_model(SentenceTransformer, EMBEDDING[0], revision=EMBEDDING[1], device='cpu',
                                 local_files_only=True, trust_remote_code=False)
     count = lambda text: len(model.tokenizer(text, truncation=False, verbose=False)['input_ids'])
     query = PREFIX+payload['query']
     if count(query) > model.max_seq_length:
-        raise ValueError('query exceeds token budget')
+        raise WorkerError('TOKEN_BUDGET')
     index = Index()
     try:
         for material in payload['materials']:
@@ -28,8 +42,10 @@ def run(payload):
                           chunker=lambda text: bounded_chunks(text, 384, count),
                           chunking_version='bge-384-v1')
         chunks = [dict(row) for row in index.db.execute('SELECT * FROM chunks ORDER BY source,start')]
+        for chunk in chunks:
+            chunk['metadata'] = json.loads(chunk['metadata'])
         if not chunks or len(chunks) > 100:
-            raise ValueError('chunk count exceeds budget')
+            raise WorkerError('CHUNK_LIMIT')
         texts = [c['text'] for c in chunks]
         vectors = model.encode(texts, normalize_embeddings=True, show_progress_bar=False)
         scores = vectors @ model.encode([query], normalize_embeddings=True, show_progress_bar=False)[0]
@@ -45,11 +61,11 @@ def run(payload):
                 for rank, key in enumerate(ranking, 1):
                     fused[key] = fused.get(key, 0)+1/(60+rank)
             candidates = sorted(fused, key=lambda key: (-fused[key], key))[:10]
-            reranker = CrossEncoder(RERANKER[0], revision=RERANKER[1], device='cpu',
+            reranker = load_model(CrossEncoder, RERANKER[0], revision=RERANKER[1], device='cpu',
                                     local_files_only=True, trust_remote_code=False, max_length=512)
             pairs = [(payload['query'], by_id[key]['text']) for key in candidates]
             if any(len(reranker.tokenizer(a,b,truncation=False,verbose=False)['input_ids']) > 512 for a,b in pairs):
-                raise ValueError('reranker pair exceeds token budget')
+                raise WorkerError('TOKEN_BUDGET')
             reranked = reranker.predict(pairs, show_progress_bar=False)
             score_map = dict(zip(candidates, map(float, reranked)))
             ordered = sorted(candidates, key=lambda key: (-score_map[key], key))
@@ -73,7 +89,7 @@ if __name__ == '__main__':
         with contextlib.redirect_stdout(sys.stderr):
             result=run(payload)
         print(json.dumps(result, ensure_ascii=False, allow_nan=False))
-    except Exception:
+    except Exception as error:
         # Do not echo source material or third-party error contents to the caller/logs.
-        print('Local semantic worker failed', file=sys.stderr)
+        print(json.dumps({'error_code': str(error) if isinstance(error, WorkerError) else 'WORKER_ERROR'}))
         sys.exit(1)

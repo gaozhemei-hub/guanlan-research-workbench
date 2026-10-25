@@ -8,7 +8,15 @@ import json
 import math
 import re
 import sqlite3
+import unicodedata
 from collections import Counter
+from itertools import groupby
+
+LEXICAL_METHOD = 'lexical-bm25-unicode-v2'
+
+
+def is_han(char):
+    return '\u3400' <= char <= '\u9fff' or '\U00020000' <= char <= '\U000323af'
 
 
 def digest(value):
@@ -16,15 +24,17 @@ def digest(value):
 
 
 def terms(text):
-    """Latin tokens and overlapping Han bigrams; a deliberately simple baseline."""
+    """Unicode alphanumerics plus Han unigrams/bigrams; offsets stay in source text."""
     result = []
-    for token in re.findall(r'[a-z0-9]+|[\u3400-\u9fff]+', text.lower()):
-        if re.fullmatch(r'[\u3400-\u9fff]+', token):
-            result.extend(token[i:i+2] for i in range(len(token)-1))
-            if len(token) == 1:
+    normalized = unicodedata.normalize('NFKC', text).casefold()
+    for run in re.findall(r'[^\W_]+', normalized):
+        for han, chars in groupby(run, is_han):
+            token = ''.join(chars)
+            if han:
+                result.extend(token)
+                result.extend(token[i:i+2] for i in range(len(token)-1))
+            else:
                 result.append(token)
-        else:
-            result.append(token)
     return Counter(result)
 
 
@@ -60,6 +70,17 @@ def bounded_chunks(text, max_units=600, count_units=len):
                 raise ValueError('one character exceeds chunk budget')
             yield paragraph, start, best, text[start:best]
             start = best
+
+
+def lexical_chunks(text):
+    """600-character windows with 20-character overlap, only for lexical search."""
+    for paragraph, start, end, _ in paragraphs(text):
+        while start < end:
+            stop = min(start+600, end)
+            yield paragraph, start, stop, text[start:stop]
+            if stop == end:
+                break
+            start = stop-20  # advances 580 characters, never loops on the final window
 
 
 class Index:
@@ -137,13 +158,36 @@ class Index:
                 frequency = token[term]
                 if frequency:
                     idf = math.log(1 + (len(rows)-document_frequency[term]+.5)/(document_frequency[term]+.5))
-                    score += idf * frequency * 2.2 / (frequency + 1.2*(.25+.75*length/max(average_length, 1)))
+                    weight = .25 if len(term) == 1 and is_han(term) and len(query_terms) > 1 else 1
+                    score += weight * idf * frequency * 2.2 / (frequency + 1.2*(.25+.75*length/max(average_length, 1)))
             if score > 0:
                 result = dict(row)
-                result.update(score=score, method='lexical-bm25-han-bigram-v1',
+                result.update(score=score, method=LEXICAL_METHOD,
                               content_hash=digest(row['text']), metadata=json.loads(row['metadata']))
                 results.append(result)
-        return sorted(results, key=lambda r: (-r['score'], r['chunk_id']))[:limit]
+        chosen = []
+        for result in sorted(results, key=lambda r: (-r['score'], r['chunk_id'])):
+            def redundant_with(old):
+                if result['source'] != old['source'] or result['paragraph'] != old['paragraph']:
+                    return False
+                left = max(result['start'], old['start'])
+                right = min(result['end'], old['end'])
+                if left >= right:
+                    return False
+                # Only suppress a window whose matches are confined to the shared area.
+                # Tokenize each outside slice separately: concatenation invents bigrams.
+                outside = terms(result['text'][:left-result['start']])
+                outside.update(terms(result['text'][right-result['start']:]))
+                whole = terms(result['text'])
+                shared = terms(result['text'][left-result['start']:right-result['start']])
+                return (not (outside.keys() & query_terms.keys())
+                        and all(whole[t] <= shared[t] for t in query_terms))
+            if any(redundant_with(old) for old in chosen):
+                continue
+            chosen.append(result)
+            if len(chosen) == limit:
+                break
+        return chosen
 
     def citation_valid(self, workspace, chunk_id, quote):
         """Current, non-stale exact quote only; this does NOT test entailment."""
@@ -164,10 +208,16 @@ def retrieve_selected(payload):
     query = payload.get('query')
     materials = payload.get('materials')
     method = payload.get('method', 'lexical')
-    if method not in {'lexical', 'vector', 'reranked'}:
+    if not isinstance(method, str) or method not in {'lexical', 'vector', 'reranked'}:
         raise ValueError('不支持的检索方式')
     if not isinstance(query, str) or not query.strip() or len(query) > 500:
         raise ValueError('请输入 1–500 字的检索问题')
+    try:
+        query.encode('utf-8')
+    except UnicodeEncodeError:
+        raise ValueError('问题含无法编码的字符') from None
+    if method == 'lexical' and not terms(query):
+        raise ValueError('问题中没有可用于词法检索的词，请换用关键词或语义方式')
     if not isinstance(materials, list) or not 1 <= len(materials) <= 20:
         raise ValueError('每次请选择 1–20 条已归档材料')
     seen, total = set(), 0
@@ -179,6 +229,10 @@ def retrieve_selected(payload):
             raise ValueError('材料标识无效或重复')
         if not isinstance(text, str) or not text.strip():
             raise ValueError('材料正文不能为空')
+        try:
+            source.encode('utf-8'); text.encode('utf-8')
+        except UnicodeEncodeError:
+            raise ValueError('材料含无法编码的字符') from None
         seen.add(source)
         total += len(text)
     if total > 100000:
@@ -186,6 +240,8 @@ def retrieve_selected(payload):
     if method != 'lexical':
         if total > 10000 or len(query) > 150:
             raise ValueError('语义试验每次限 1 万字正文、150 字问题，请缩小范围。')
+        if sum(sum(1 for _ in paragraphs(m['text'])) for m in materials) > 100:
+            raise ValueError('所选材料非空段落超过 100 段，请合并段落或减少材料。')
         try:
             from . import semantic
         except ImportError:
@@ -195,10 +251,10 @@ def retrieve_selected(payload):
     try:
         for material in materials:
             index.replace('request', material['id'], digest(material['text']), material['text'],
-                          chunker=bounded_chunks, chunking_version='characters-600-v1')
+                          chunker=lexical_chunks, chunking_version='characters-600-overlap20-v2')
         hits = index.search('request', query, limit=5)
-        return evidence_result({'hits': hits, 'method': 'lexical-bm25-han-bigram-v1',
-                'scope': 'request-memory-only', 'chunking': 'characters-600-v1',
+        return evidence_result({'hits': hits, 'method': LEXICAL_METHOD,
+                'scope': 'request-memory-only', 'chunking': 'characters-600-overlap20-v2',
                 'warning': '候选段落只表示词汇相关，不代表证据充分或观点正确。未调用生成模型。'})
     finally:
         index.close()
