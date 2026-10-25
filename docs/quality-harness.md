@@ -1,5 +1,9 @@
 # Harness quality record — 2026-10-24
 
+## Remote publication — 2026-10-25
+
+The retrieval increment is published for review in [PR #1](https://github.com/gaozhemei-hub/guanlan-research-workbench/pull/1), not merged into main. GitHub Actions [run 40180159168](https://github.com/gaozhemei-hub/guanlan-research-workbench/actions/runs/40180159168) passed on commit `613a763bb8d2d26a8d14802df98165f5d9c9e915`, including dependency installation and the declared backend suite on Ubuntu/Python 3.12. Current-head checks are shown on the PR. This remote job does not execute browser tests, download models, evaluate real-model quality or deploy a website. Prior local evidence and dated failure records below remain unchanged.
+
 ## Fresh synthetic acceptance and evidence status — 2026-10-25
 
 An original corpus separate from development fixtures ran through all three product modes: 6 materials, 10 questions, 30 retrievals including 20 local model requests. Full evidence coverage: lexical 4/6, vector 5/6, reranked 5/6 answerable questions. Both semantic modes returned candidates for all 4 unanswerable questions. This is AI-authored labeled data, not human blind evaluation. See [acceptance report](检索验收与证据边界-v0.1.md); local raw report is `data/retrieval-acceptance/1792904474584235000.json`.

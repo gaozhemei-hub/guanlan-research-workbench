@@ -1,6 +1,6 @@
 # Harness foundation and RAG experiment
 
-Status: foundation locally verified; the product now offers request-scoped lexical and optional local vector/reranked evidence search with source previews. Generation is not implemented. Remote CI not yet executed. See the [quality record](../quality-harness.md) for dated results and recovery evidence.
+Status: foundation locally verified; the product now offers request-scoped lexical and optional local vector/reranked evidence search with source previews. Generation is not implemented. Published for review in [PR #1](https://github.com/gaozhemei-hub/guanlan-research-workbench/pull/1); initial remote backend CI passed. Check the PR for current-head status. See the [quality record](../quality-harness.md) for dated results and recovery evidence.
 
 Reference: [OpenAI Harness engineering](https://openai.com/index/harness-engineering/). Adaptation for a small single-user product, not an official framework integration.
 
