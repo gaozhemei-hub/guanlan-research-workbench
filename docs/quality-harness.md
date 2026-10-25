@@ -1,5 +1,11 @@
 # Harness quality record — 2026-10-24
 
+## Fresh synthetic acceptance and evidence status — 2026-10-25
+
+An original corpus separate from development fixtures ran through all three product modes: 6 materials, 10 questions, 30 retrievals including 20 local model requests. Full evidence coverage: lexical 4/6, vector 5/6, reranked 5/6 answerable questions. Both semantic modes returned candidates for all 4 unanswerable questions. This is AI-authored labeled data, not human blind evaluation. See [acceptance report](检索验收与证据边界-v0.1.md); local raw report is `data/retrieval-acceptance/1792904474584235000.json`.
+
+No ranking tuning followed the observed results. API responses now explicitly carry `unassessed` or `no_candidates` and `generated_answer: null`; the page states that sufficiency is unassessed. This is not an automated sufficiency classifier. Run `data/verification/run-r10hef4v/`: **85 backend / 22 UI tests passed**, including high-score/non-answer boundary and an unanswerable browser question. Standalone HTML rebuilt. No private corpus, paid API calls or remaining worker/server processes.
+
 ## Optional local semantic retrieval — 2026-10-25
 
 Run `data/verification/run-5x80lox_/`: **84 backend / 21 UI tests passed**. New deterministic checks mock worker failures/timeouts/concurrency and assert offline/no-fallback behavior; UI checks method changes and explicit errors. They do not run real models.

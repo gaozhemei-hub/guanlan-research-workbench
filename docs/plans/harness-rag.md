@@ -26,6 +26,8 @@ Follow-up: expanded to 24 paragraphs and 17 questions in [experiment v0.2](../re
 
 ## Deferred
 
+Fresh-corpus acceptance completed: [evidence-boundary report](../检索验收与证据边界-v0.1.md). No tuning against observed results; semantic modes still miss one company's missing-contract caveat and return candidates on unanswerable questions. API/UI explicitly mark sufficiency as unassessed. Engineering 85/22 passed. The generation gate remains closed: independent human evaluation, support/contradiction and cross-chunk checks are unresolved. Next delivery work can package the tested retrieval-only feature and review documentation/CI without claiming full RAG answering.
+
 Latest semantic follow-up: optional cached local models are connected to the page via an isolated request worker. 84 backend / 21 UI checks passed, plus real local-model browser checks and an original long-text mechanics check. See [manual v0.2](../历史证据检索-使用说明-v0.2.md). Still needed: independent long-form quality evaluation, cross-chunk context decisions and answer-sufficiency handling before generation. No paid API authorization is inferred; no private corpus was used.
 
 Latest implementation: [evidence search flow](../历史证据检索-使用说明-v0.1.md) now supports explicit selection, in-memory per-request indexing and source highlighting. Token-counted long-text chunks passed cached-tokenizer validation. 79 backend / 19 UI tests passed. Next: connect optional local vector/reranking to the same lifecycle, validate independent long-form questions and latency, and only then consider answer generation with evidence-sufficiency checks. No persistent server corpus is introduced by the first page.

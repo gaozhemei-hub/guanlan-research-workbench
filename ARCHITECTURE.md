@@ -28,6 +28,8 @@ The evidence page now passes an explicit `lexical`, `vector` or `reranked` metho
 
 One worker at a time, 38-second timeout, 10,000 source characters / 150 query characters / 100 chunks bound this experimental path. BGE chunks count 384 tokens including special tokens; reranker pairs are checked against 512 tokens. The worker exits after each request; no persistent embeddings or corpus. This trades repeated model-load latency for dependency/data isolation. Candidate ranking is not answer sufficiency; no answer generation is enabled. See [v0.2 manual](docs/历史证据检索-使用说明-v0.2.md).
 
+All retrieval responses mark evidence status as `unassessed` when candidates exist or `no_candidates` otherwise, with `generated_answer: null`. No score threshold upgrades this to supported/verified. The UI repeats this boundary; it is an explicit absence of sufficiency assessment, not a classifier.
+
 ## Verification
 
 `scripts/verify.py` runs a declared backend suite. Its optional browser suite starts its own server on a selected free port with a temporary data directory, disabled scheduling and disabled model calls. Artifacts persist under ignored `data/verification/`. Test results describe engineering behavior, not investment or user outcomes.

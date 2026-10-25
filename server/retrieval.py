@@ -153,6 +153,12 @@ class Index:
         return bool(row and not row['stale'] and isinstance(quote, str) and quote.strip() and quote in row['text'])
 
 
+def evidence_result(result):
+    """Ranking never upgrades a candidate to a supported answer."""
+    return {**result, 'evidence_status': 'unassessed' if result['hits'] else 'no_candidates',
+            'generated_answer': None}
+
+
 def retrieve_selected(payload):
     """Request-scoped index: no persistence, shared corpus or remote model access."""
     query = payload.get('query')
@@ -184,15 +190,15 @@ def retrieve_selected(payload):
             from . import semantic
         except ImportError:
             import semantic
-        return semantic.retrieve({'query': query, 'materials': materials, 'method': method})
+        return evidence_result(semantic.retrieve({'query': query, 'materials': materials, 'method': method}))
     index = Index()
     try:
         for material in materials:
             index.replace('request', material['id'], digest(material['text']), material['text'],
                           chunker=bounded_chunks, chunking_version='characters-600-v1')
         hits = index.search('request', query, limit=5)
-        return {'hits': hits, 'method': 'lexical-bm25-han-bigram-v1',
+        return evidence_result({'hits': hits, 'method': 'lexical-bm25-han-bigram-v1',
                 'scope': 'request-memory-only', 'chunking': 'characters-600-v1',
-                'warning': '候选段落只表示词汇相关，不代表证据充分或观点正确。未调用生成模型。'}
+                'warning': '候选段落只表示词汇相关，不代表证据充分或观点正确。未调用生成模型。'})
     finally:
         index.close()

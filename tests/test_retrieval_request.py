@@ -1,10 +1,17 @@
 import unittest
 import json
-from server.retrieval import bounded_chunks, retrieve_selected
+from server.retrieval import bounded_chunks, retrieve_selected, evidence_result
 from tests.test_deploy import Server
 
 
 class RequestRetrieval(unittest.TestCase):
+    def test_ranking_score_never_means_sufficient_evidence(self):
+        result=evidence_result({'hits':[{'score':999999,'text':'相关文字'}]})
+        self.assertEqual(result['evidence_status'],'unassessed')
+        self.assertIsNone(result['generated_answer'])
+        empty=evidence_result({'hits':[]})
+        self.assertEqual(empty['evidence_status'],'no_candidates')
+        self.assertIsNone(empty['generated_answer'])
     def test_http_endpoint_and_origin_boundary(self):
         with Server() as server:
             body={'query':'黄金', 'materials':[{'id':'one','text':'黄金库存待核实。'}]}

@@ -95,5 +95,12 @@ class RetrievalUI(unittest.TestCase):
         p.locator('#evidence-method').select_option('reranked')
         self.assertEqual(p.locator('[data-evidence-open]').count(),0)
 
+    def test_unanswerable_question_is_not_presented_as_answer(self):
+        self.seed();p=self.page
+        p.locator('#evidence-query').fill('黄金明天的精确价格是多少')
+        p.locator('#evidence-search').click();p.wait_for_selector('[data-evidence-open]')
+        self.assertIn('尚未判断',p.locator('#evidence-status').inner_text())
+        self.assertIn('没有生成答案',p.locator('#evidence-status').inner_text())
+
 
 if __name__=='__main__':unittest.main()
