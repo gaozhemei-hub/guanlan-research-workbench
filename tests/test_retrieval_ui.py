@@ -76,5 +76,24 @@ class RetrievalUI(unittest.TestCase):
         self.page.goto(path.as_uri()+'#retrieval')
         self.assertTrue(self.page.locator('#evidence-search').is_disabled())
 
+    def test_semantic_error_does_not_fall_back(self):
+        self.seed();p=self.page;calls=[]
+        def fail(route):
+            calls.append(route.request.post_data_json)
+            route.fulfill(status=400,json={'error':'本地模型不可用，没有自动降级。'})
+        p.route('**/api/retrieve',fail)
+        p.locator('#evidence-method').select_option('vector')
+        p.locator('#evidence-search').click()
+        p.wait_for_function("document.querySelector('#evidence-error').textContent.includes('模型不可用')")
+        self.assertEqual(len(calls),1)
+        self.assertEqual(calls[0]['method'],'vector')
+        self.assertEqual(p.locator('[data-evidence-open]').count(),0)
+
+    def test_method_change_clears_old_results(self):
+        self.seed();p=self.page
+        p.locator('#evidence-search').click();p.wait_for_selector('[data-evidence-open]')
+        p.locator('#evidence-method').select_option('reranked')
+        self.assertEqual(p.locator('[data-evidence-open]').count(),0)
+
 
 if __name__=='__main__':unittest.main()

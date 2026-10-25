@@ -1,5 +1,13 @@
 # Harness quality record — 2026-10-24
 
+## Optional local semantic retrieval — 2026-10-25
+
+Run `data/verification/run-5x80lox_/`: **84 backend / 21 UI tests passed**. New deterministic checks mock worker failures/timeouts/concurrency and assert offline/no-fallback behavior; UI checks method changes and explicit errors. They do not run real models.
+
+Separately, the main task ran the actual local vector and reranked endpoints, then a real browser through both methods, source highlighting and clearing. Browser calls took about 3.8/4.3 seconds in this run; results and screenshot are in `data/retrieval-ui/semantic-flow.json` and `semantic-search.png`. The screenshot was visually inspected and copied to the public manual because it contains original teaching fixtures only. Direct adapter results are in `data/retrieval-comparison/product-semantic-check.json`.
+
+An original 4,049-character repeated-padding fixture with a cashflow target sentence returned that sentence under both modes with exact original offsets (`product-long-text-check.json`). This is a mechanical smoke check, not independent retrieval-quality evidence. Optional dependencies/models stayed local, no paid API or private corpus. Worker processes and temporary verification servers exited. Remaining: independent quality evaluation and sufficiency handling; no generated answers, human blind review or user testing.
+
 ## Product retrieval follow-up — 2026-10-25
 
 Explicit material selection, request-scoped lexical retrieval, original-text highlighting and invalidation are implemented. Final run `data/verification/run-2h8xlxs5/`: **79 backend / 19 UI tests passed**. UI scenarios exercise the real endpoint after teaching-material archival; also cover Unicode offsets, source changes, late responses and offline HTML. The standalone HTML was rebuilt. Separate real-server screenshots were visually checked and contain original teaching data only.

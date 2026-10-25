@@ -20,7 +20,13 @@ Separate ingestion/chunking, retrieval, reranking, generation and citation valid
 
 `prototype/dist/retrieval.js` implements explicit selection and source previews. `/api/retrieve` accepts up to 20 selected records / 100,000 characters, builds a request-scoped in-memory lexical index and closes it before returning. It inherits auth/host/origin controls, adds rate limiting and accepts only loopback connections. It does not persist or share source text. The browser remains authoritative; results are invalidated on in-page source/query/scope changes, with original text rechecked before highlighting. Cross-tab synchronization is not implemented.
 
-Production candidate chunks are bounded to 600 characters; this is not a token budget. The shared chunker accepts a tokenizer counting callback; a cached BGE tokenizer has separately validated long-text coverage under 512 tokens. Vector/reranking remains experiment-only. No endpoint generates answers.
+Lexical candidate chunks are bounded to 600 characters; this is not a token budget. The shared chunker accepts a tokenizer counting callback; a cached BGE tokenizer has separately validated long-text coverage under 512 tokens. The optional vector/reranking path is described below. No endpoint generates answers.
+
+## Optional semantic path (same day follow-up)
+
+The evidence page now passes an explicit `lexical`, `vector` or `reranked` method. Lexical still uses 600-character chunks. Optional semantic methods use `semantic.py` to invoke `semantic_worker.py` via a separate `.venv-rag` interpreter (or server-configured `GUANLAN_RAG_PYTHON`). Source text travels on stdin, not command arguments or files. Fixed model revisions load from cache with offline flags and `local_files_only`; missing dependencies/models fail explicitly, without downloading or falling back.
+
+One worker at a time, 38-second timeout, 10,000 source characters / 150 query characters / 100 chunks bound this experimental path. BGE chunks count 384 tokens including special tokens; reranker pairs are checked against 512 tokens. The worker exits after each request; no persistent embeddings or corpus. This trades repeated model-load latency for dependency/data isolation. Candidate ranking is not answer sufficiency; no answer generation is enabled. See [v0.2 manual](docs/历史证据检索-使用说明-v0.2.md).
 
 ## Verification
 

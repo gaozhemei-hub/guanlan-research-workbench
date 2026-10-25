@@ -157,6 +157,9 @@ def retrieve_selected(payload):
     """Request-scoped index: no persistence, shared corpus or remote model access."""
     query = payload.get('query')
     materials = payload.get('materials')
+    method = payload.get('method', 'lexical')
+    if method not in {'lexical', 'vector', 'reranked'}:
+        raise ValueError('不支持的检索方式')
     if not isinstance(query, str) or not query.strip() or len(query) > 500:
         raise ValueError('请输入 1–500 字的检索问题')
     if not isinstance(materials, list) or not 1 <= len(materials) <= 20:
@@ -174,6 +177,14 @@ def retrieve_selected(payload):
         total += len(text)
     if total > 100000:
         raise ValueError('所选材料合计超过 10 万字，请缩小范围')
+    if method != 'lexical':
+        if total > 10000 or len(query) > 150:
+            raise ValueError('语义试验每次限 1 万字正文、150 字问题，请缩小范围。')
+        try:
+            from . import semantic
+        except ImportError:
+            import semantic
+        return semantic.retrieve({'query': query, 'materials': materials, 'method': method})
     index = Index()
     try:
         for material in materials:
