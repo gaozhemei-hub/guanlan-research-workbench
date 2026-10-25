@@ -7,7 +7,7 @@ from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'repro'))
 import repro_frontend as R
 from playwright.sync_api import sync_playwright
-R.BASE=os.environ.get('GUANLAN_TEST_URL','http://127.0.0.1:8876/')
+# The shared helper owns the target URL; importing this suite must not change it.
 
 class Reliability(unittest.TestCase):
  @classmethod

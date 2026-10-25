@@ -11,8 +11,8 @@ const FRAMES = [
  {id:'technical',area:'companies',name:'价格与技术',sub:'描述走势',question:'价格表现是什么，数据口径是否可比？',desc:'用收盘价计算 MA、RSI、MACD。技术指标描述历史价格，不替代经营或估值判断。',path:['同口径价格','指标计算','横向比较','提出解释问题'],metrics:['MA20','RSI14','MACD(12,26,9)'],checks:['复权方式、币种和交易日期是否一致？','样本长度是否足够？','量价表现是否有公告或经营证据支持？'],counter:'数据缺失、复权变化或单一指标出现多种解释。',tags:['技术','RSI','MACD','均线','股价'],basis:'技术指标独立于估值 · TA-Lib 计算'},
  {id:'narrative',area:'narrative',name:'市场叙事',sub:'想象 → 可检验条件',question:'市场相信的未来，需要什么条件才会兑现？',desc:'记录叙事提出者、传播线索、落地条件与反证。关联具体的宏观、行业或公司问题，不把热度当基本面。',path:['谁在讲述','共识如何变化','落地里程碑','兑现或证伪'],metrics:['公开表述与可追溯来源','政策 / 技术 / 商业里程碑','与叙事相反的证据'],checks:['观点是谁提出的，是否只是单一来源？','技术可行、经济性成立和商业化是不同阶段吗？','什么情况会推翻这个故事？'],counter:'关键条件不成立、替代路线胜出或时间窗口变化。',tags:['叙事','共识','技术路线','替代','想象','narrative'],basis:'《穿透叙事》外部阅读稿的审慎转译 · 非原书核验结论'}
 ];
-const AREAS={home:'研究总览',macro:'宏观环境',metals:'贵金属产业',companies:'A 股公司',narrative:'叙事观察',reader:'材料研读',settings:'数据与设置'};
-const NAV=[['home','◫','研究总览','先看研究进度'],['macro','◎','宏观环境','增长 · 通胀 · 政策 · 金融'],['metals','◇','贵金属产业','黄金 · 白银 · 产业链'],['companies','▤','A 股公司','经营 · 估值 · 技术'],['narrative','◌','叙事观察','跨层次追踪假设'],['reader','＋','材料研读','把新信息放进框架'],['settings','⚙','数据与设置','连接状态 · 备份']];
+const AREAS={retrieval:'历史证据检索',home:'研究总览',macro:'宏观环境',metals:'贵金属产业',companies:'A 股公司',narrative:'叙事观察',reader:'材料研读',settings:'数据与设置'};
+const NAV=[['retrieval','⌕','历史证据检索','找回已归档原文'],['home','◫','研究总览','先看研究进度'],['macro','◎','宏观环境','增长 · 通胀 · 政策 · 金融'],['metals','◇','贵金属产业','黄金 · 白银 · 产业链'],['companies','▤','A 股公司','经营 · 估值 · 技术'],['narrative','◌','叙事观察','跨层次追踪假设'],['reader','＋','材料研读','把新信息放进框架'],['settings','⚙','数据与设置','连接状态 · 备份']];
 
 // Curated starting points; never inserted into the user's watchlist without confirmation.
 const NARRATIVE_TEMPLATES = [

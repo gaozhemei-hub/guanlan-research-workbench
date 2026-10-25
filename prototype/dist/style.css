@@ -8,3 +8,7 @@
 th small { display:block; margin-top:4px; font-weight:normal; }
 
 .transmission-path {display:flex;flex-wrap:wrap;gap:12px;list-style:none;padding:0;} .transmission-path li {background:#eef2e9;padding:12px;border-radius:8px;max-width:260px;} .transmission-path li:not(:last-child)::after {content:" →";color:#547858;} .research-entry h3 {line-height:1.7;} #dialog h3 {margin-top:24px;}
+:root .evidence-choice{display:flex;gap:10px;align-items:center;margin:12px 0}
+.evidence-choice input{width:auto}
+.evidence-source{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.9}
+#evidence-query{width:100%;margin:12px 0}

@@ -12,6 +12,7 @@ import ssl, certifi
 import feedparser
 import ai
 import prices
+import retrieval
 import deploy
 import subprocess, sys
 from providers import AK_SOURCES
@@ -186,6 +187,12 @@ class Handler(SimpleHTTPRequestHandler):
                 except prices.PriceError as error: return self.reply({'error':str(error),'errorCode':error.code,'attempts':error.attempts},502)
                 return self.reply({**quote, 'technical': technical({'csv':quote['csv']})})
             if self.path == '/api/technical': return self.reply(technical(payload))
+            if self.path == '/api/retrieve':
+                if self.client_address[0] not in {'127.0.0.1', '::1'}:
+                    return self.reply({'error':'证据检索试验目前仅开放本机访问'},403)
+                if not deploy.LIMITER.allow('retrieve:'+who, 20, 60):
+                    return self.reply({'error':'检索过于频繁，请稍后再试'},429)
+                return self.reply(retrieval.retrieve_selected(payload))
             return self.reply({'error':'Not found'},404)
         except (ValueError, KeyError, TypeError) as error: return self.reply({'error':str(error)},400)
         except Exception: return self.reply({'error':'本地计算失败，请检查依赖安装'},500)
